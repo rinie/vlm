@@ -1,0 +1,13 @@
+
+ALTER PROCEDURE RPCPRJINSERTART COMPILE;                                        
+ALTER PROCEDURE RPCPRJUPDATEROWART COMPILE;                                     
+ALTER PROCEDURE PRJRPCUPDATEARTPACK COMPILE;                                    
+ALTER PROCEDURE PRJRPCINSERTARTPACK COMPILE;                                    
+ALTER PROCEDURE RPCPRJUPDATEART COMPILE;                                        
+ALTER PROCEDURE RPCPRJUPDATEROWARTNOCOMMIT COMPILE;                             
+ALTER FUNCTION PRJCALCENTITY COMPILE;                                           
+ALTER PROCEDURE PRJUPDATEARTENTITY COMPILE;                                     
+ALTER FUNCTION PRJFHMW860 COMPILE;                                              
+
+ALTER PACKAGE FRHOSTPKG COMPILE BODY;                                           
+ALTER PACKAGE WAMPKG COMPILE BODY;                                              

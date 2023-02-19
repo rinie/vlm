@@ -1,0 +1,32 @@
+{
+  "name": "vlm",
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "debug": "^4.3.4",
+    "fs-extra": "^11.1.0",
+    "net": "^1.0.2",
+    "readline": "^1.3.0"
+  },
+  "scripts": {
+    "client": "node vlm.js c localhost.js",
+    "server": "node vlm.js s localhost.js"
+  },
+  "description": "modula link emulation",
+  "version": "1.0.0",
+  "main": "vlm.js",
+  "keywords": [
+    "vlm",
+    "kardex",
+    "modula-link"
+  ],
+  "author": "Rinie Kervel",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.3.0"
+  }
+}
