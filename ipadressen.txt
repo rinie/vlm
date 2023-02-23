@@ -1,0 +1,31 @@
+LMHC interfaces:
+
+1. VLM liften via Modula Link:
+• IP-adres: 10.11.0.13
+• Poort: 11000
+
+Modula 1
+• Id/PREFIX: 11
+• Lade/TRAY: 1001 - 1067
+Modula 2
+• ID/PREFIX: 21
+• Lade/TRAY: 2001 - 2067
+Modula 3
+• ID/PREFIX: 31
+• Lade/TRAY: 3001 - 3067
+Modula 4
+• ID/PREFIX: 41
+• Lade/TRAY: 4001 - 4067
+Modula 5
+• ID/PREFIX: 51
+• Lade/TRAY: 5001 - 5067
+Modula 6
+• ID/PREFIX: 61
+• Lade/TRAY: 6001 ? 6067
+
+Conveyor
+IP: 172.16.20.60
+poort:
+
+DTL Atop :
+4 controllers IP: 172.16.20.70-73 (70 tot en met 73)

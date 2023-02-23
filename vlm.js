@@ -48,6 +48,7 @@ const debugvm = debug('vlmmove'); // vlm operations
 // const debugh = debug('hostcom');
 // const debugw = debug('watch');
 const debugexit = debug('exit');
+var trayCount = 0;
 /*
  * Startup/Usage: check required parameters for
  * client or server usage
@@ -78,7 +79,8 @@ const commands = [
   {
     name: 'PROTOCOL', client: ['version'], server: ['version', 'result'], bayMachinePrefix: false,
   },
-  { name: 'STATUS', client: [], server: ['status', 'pos1PickTray', 'pos2PickTray', 'pos1ExeTray', 'pos2ExeTray', 'errorCode', 'pos1OnePickTray'] },
+  // 61|6|STATUS|3|0|0|0|0|0
+  { name: 'STATUS', client: [], server: ['status', 'pos1PickTray', 'pos2PickTray', 'pos1ExeTray', 'pos2ExeTray', 'errorCode' /*, 'pos1OnePickTray' */] },
   { name: 'CALL', client: ['tray', 'position'], server: ['result'] },
   { name: 'RETURN', client: ['position'], server: ['result'] },
   // laser
@@ -160,50 +162,57 @@ const instDefaults = {
 };
 
 const vlms = [
+
   {
-    vlm: '10',
+    vlm: '1',
     liftGroup: 0,
     modelIndex: 0,
+    trayOffset: 1000,
     bays: [{
       status: 0, posPick: [0, 0], posExe: [0, 0], posOnePick: [0],
     }],
   },
   {
-    vlm: '11',
+    vlm: '2',
     liftGroup: 0,
     modelIndex: 1,
+    trayOffset: 2000,
     bays: [{
       status: 0, posPick: [0, 0], posExe: [0, 0], posOnePick: [0],
     }],
   },
   {
-    vlm: '12',
+    vlm: '3',
     liftGroup: 0,
     modelIndex: 1,
+    trayOffset: 3000,
     bays: [{
       status: 0, posPick: [0, 0], posExe: [0, 0], posOnePick: [0],
     }],
   },
   {
-    vlm: '13',
+    vlm: '4',
     liftGroup: 1,
     modelIndex: 1,
+    trayOffset: 4000,
     bays: [{
       status: 0, posPick: [0, 0], posExe: [0, 0], posOnePick: [0],
     }],
   },
   {
-    vlm: '14',
+    vlm: '5',
     liftGroup: 1,
     modelIndex: 1,
+    trayOffset: 5000,
     bays: [{
       status: 0, posPick: [0, 0], posExe: [0, 0], posOnePick: [0],
     }],
   },
   {
-    vlm: '15',
+    vlm: '6',
     liftGroup: 1,
     modelIndex: 0,
+    trayOffset: 6000,
     bays: [{
       status: 0, posPick: [0, 0], posExe: [0, 0], posOnePick: [0],
     }],
@@ -353,7 +362,7 @@ if (isClient) {
   }
   function processRequestQueue(checkOpenRequestCount) {
     if (checkOpenRequestCount && openRequestCount > 1) {
-      debugc(`processRequestQueue ${openRequestCount} skip write`);
+      debugdt(`processRequestQueue ${openRequestCount} skip write`);
     }
     if (requestQueue.length > 0) {
       const req2 = requestQueue.find((i) => i.send === null);
@@ -365,7 +374,7 @@ if (isClient) {
           req2.readyTimeout = now + 120 * 1000;
         }
         client.write(req2.msg + terminator);
-        debugc(`processRequestQueue ${openRequestCount} ${req2.prefix}|${req2.requestId}|${req2.command}`);
+        debugc(`processRequestQueue ${openRequestCount} ${req2.msg}`);
         debugdt(req2);
       } else if (openRequestCount > 0) {
         debugc(`processRequestQueue ${openRequestCount} reset`);
@@ -390,7 +399,7 @@ if (isClient) {
 
   function debugDisplay(prefix, message) {
     displayClear(prefix);
-    displayShow(prefix, message, 1, 0);
+    displayShow(prefix, message, 200, 0);
   }
 
   // move storage/retrieval finished 'end/ready' or 'timeout'
@@ -398,47 +407,58 @@ if (isClient) {
     // demo script, show status on display...
     const finished = !timeout;
     debugdt(curRequest);
-    debugDisplay(prefix, `Finished ${curRequest.command} ${curRequest.position} f${finished} t${timeout}`);
+    //debugDisplay(prefix, `Finished ${curRequest.command} ${curRequest.position} f${finished} t${timeout}`);
+    debugDisplay(prefix, `Centric and Vanas at Allsport: VLM ${prefix} ${curRequest.command} ${curRequest.position}`);
   }
   // Vlm/Bay idle and in automayic mode ...
   function vlmBayReadyForSrCommand(prefix, curBay, curVlm) {
     // demo script
-    const waitIdleTimeout = 30000;
+    const waitIdleTimeout = 5000;
     debugvm(`Wait ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
     debugDisplay(prefix, `Wait ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
     setTimeout(() => { // determine next command: RETURN 1, RETURN 2 or CALL 1 or CALL 2
-      if (curBay.posPick[0] > 0) {
+      debugvm(`Timeout ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
+      debugDisplay(prefix, `Timeout ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
+      if ((curBay.posPick[0] > 0) && (curBay.posExe[1] !== 0)) {
+        debugvm(`return 1 ${prefix} cur ${curBay.posPick[0]} ${curBay.posExe[1]}`);
         returnPosition(prefix, 1);
-      } else if (curBay.posPick[1] > 1) {
+      } else if (curBay.posPick[1] > 0 && (curBay.posExe[0] !== 0)) {
+        debugvm(`return 2 ${prefix} cur ${curBay.posPick[1]} ${curBay.posExe[0]}`);
         returnPosition(prefix, 2);
-      } else if (curBay.posExe[0] === 0) {
-        let tray = 1;
-        const maxTray = 67;
-        if (curBay.posExe[1] > 0) {
-          tray = maxTray + 1 - curBay.posExe[1];
-          if (tray === curBay.posExe[1]) {
-            tray += 1;
-          }
-          if (tray > maxTray) {
-            tray = 1;
-          }
-        }
-        callTray(prefix, tray, 1);
-      } else if (curBay.posExe[1] === 0) {
-        let tray = 1;
-        const maxTray = 67;
-        if (curBay.posExe[0] > 0) {
-          tray = maxTray + 1 - curBay.posExe[0];
-          if (tray === curBay.posExe[0]) {
-            tray += 1;
-          }
-          if (tray > maxTray) {
-            tray = 1;
-          }
-        }
-        callTray(prefix, tray, 2);
       }
-    }, waitIdleTimeout);
+      else if ((curBay.posExe[0] === 0) && (curBay.posPick[0] === 0)) {
+        let tray = 1;
+        const maxTray = 67;
+        tray += trayCount;
+        trayCount++;
+        if (tray > maxTray) {
+          tray = 1;
+          trayCount = 1;
+        }
+        debugvm(`call 1 ${prefix} ${tray} cur ${curBay.posExe[0]} ${curVlm.trayOffset}`);
+        callTray(prefix, tray + curVlm.trayOffset, 1);
+      } else if ((curBay.posExe[1] === 0) && (curBay.posPick[1] === 0)) {
+        let tray = 67;
+        const maxTray = 67;
+        tray -= trayCount;
+        trayCount++;
+        if (tray <= 1) {
+          tray = maxTray;
+          trayCount = 1;
+        }
+        debugvm(`call 2 ${prefix} ${tray} cur ${curBay.posExe[0]} ${curVlm.trayOffset}`);
+        callTray(prefix, tray + curVlm.trayOffset , 2);
+      }
+      /*
+      else
+      else if (curBay.posPick[1] > 0) {
+        debugvm(`return B 2 ${prefix} cur ${curBay.posPick[1]} ${curBay.posExe[1]}`, curBay);
+        returnPosition(prefix, 2);
+      } else if (curBay.posPick[0] > 0) {
+        debugvm(`return B 1 ${prefix} cur ${curBay.posPick[0]} ${curBay.posExe[1]}`, curBay);
+        returnPosition(prefix, 1);
+      } */
+      }, waitIdleTimeout);
   }
 
   function processStatusResponse(resp) {
@@ -450,12 +470,24 @@ if (isClient) {
     // debugv(`getVlmBay1 ${prefix} ${vlmIndex} ${bay}`);
     const curVlm = vlms.find((i) => i.vlm === vlmIndex);
     const bayIndex = bay - 1;
+    if (resp.pos1PickTray >= curVlm.trayOffset) {
+      resp.pos1PickTray -= curVlm.trayOffset;
+    }
+    if (resp.pos2PickTray >= curVlm.trayOffset) {
+      resp.pos2PickTray -= curVlm.trayOffset;
+    }
+    if (resp.pos1ExeTray >= curVlm.trayOffset) {
+      resp.pos1ExeTray -= curVlm.trayOffset;
+    }
+    if (resp.pos2ExeTray >= curVlm.trayOffset) {
+      resp.pos2ExeTray -= curVlm.trayOffset;
+    }
     curVlm.bays[bayIndex].status = +resp.status;
     curVlm.bays[bayIndex].posPick[0] = +resp.pos1PickTray;
     curVlm.bays[bayIndex].posPick[1] = +resp.pos2PickTray;
     curVlm.bays[bayIndex].posExe[0] = +resp.pos1ExeTray;
     curVlm.bays[bayIndex].posExe[1] = +resp.pos2ExeTray;
-    curVlm.bays[bayIndex].posOnePick[0] = +resp.pos1OnePickTray;
+    //curVlm.bays[bayIndex].posOnePick[0] = +resp.pos1OnePickTray;
 
     // extra in client
     curVlm.bays[bayIndex].errorCode = +resp.errorCode;
@@ -464,7 +496,7 @@ if (isClient) {
     const index = requestQueue.findIndex((i) => i.prefix === resp.prefix && i.readyTimeout !== null);
     const curRequest = requestQueue.find((i) => i.prefix === resp.prefix && i.readyTimeout !== null);
     if (index > -1) {
-      // debugc(`processStatusResponse ${waitReadyCount} check ready`, curRequest);
+      //debugc(`processStatusResponse ${waitReadyCount} check ready`, curRequest);
       const now = Date.now();
       let finished = false;
       let timeout = false;
@@ -472,9 +504,9 @@ if (isClient) {
       const otherPosIndex = 1 - posIndex;
       if (curRequest.command === 'CALL') {
         // finished and current pick position
-        if (curBay.posPick[posIndex] === curRequest.tray) {
+        if (curBay.posPick[posIndex] === curRequest.tray - curVlm.trayOffset) {
           finished = true;
-        } else if (curBay.posExe[posIndex] === curRequest.tray
+        } else if (curBay.posExe[posIndex] === curRequest.tray - curVlm.trayOffset
             && (curBay.posPick[otherPosIndex] !== 0)) {
           // assume finished but other pos is actual picking
           finished = true;
@@ -498,8 +530,9 @@ if (isClient) {
         if (waitReadyCount > 0) {
           waitReadyCount -= 1;
         }
-        debugvm(`Command ready ${curRequest.prefix}|${curRequest.requestid}|${curRequest.command} remove ${index} f${finished} t${timeout} from requestQueue`);
+        debugvm(`Command ready ${curRequest.prefix}|${curRequest.requestId}|${curRequest.command} remove ${index} f${finished} t${timeout} from requestQueue`);
         vlmBaySrCommandFinished(prefix, curRequest, curBay, curVlm, timeout);
+        //vlmBayReadyForSrCommand(prefix, curBay, curVlm);
       } // no current command.
     } else if (curBay.status === 0) {
       vlmBayReadyForSrCommand(prefix, curBay, curVlm);
@@ -508,7 +541,7 @@ if (isClient) {
       debugc(`processStatusResponse ${waitReadyCount} ${statusTimeout}  ${resp.prefix}`);
       getStatus(resp.prefix);
     }, statusTimeout);
-    // debugc('processStatusResponse2', curVlm);
+    //debugc('processStatusResponse2', curVlm);
   }
 
   // startup ask status of each bay in installation
@@ -735,7 +768,7 @@ if (isServer) {
       pos1ExeTray: curBay.posExe[0],
       pos2ExeTray: curBay.posExe[1],
       errorCode,
-      pos1OnePickTray: curBay.posOnePick[0],
+      //pos1OnePickTray: curBay.posOnePick[0],
     };
     return resp;
   }
