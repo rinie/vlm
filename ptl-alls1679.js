@@ -3,8 +3,8 @@ const basePath = '/opt/locus';
 const appName = 'ptl';
 
 module.exports = {
-  ptlHostName: process.env.PTL_IP || '172.16.20.70',
-  ptlIp: process.env.PTL_IP || '172.16.20.70',
+  ptlHostName: process.env.PTL_IP || '172.16.20.73',
+  ptlIp: process.env.PTL_IP || '172.16.20.73',
   ptlPort: 4660, // PTL server listens on this port
   ptlMessageType: 0x60, // PTL port default
   //sendOnce: `0|1|PROTOCOL|2.0\r`,

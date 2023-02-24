@@ -181,6 +181,7 @@ function getCommand(dataArgs, isRequest) {
     */
   req.errorText = errorText;
   req.curCmd = curCmd;
+  debugd(`getCommand command ${subCommand}`, curCmd);
   return req;
 }
 

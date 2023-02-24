@@ -372,6 +372,7 @@ if (isClient) {
         req2.ackTimeout = now + 2000;
         if (['CALL', 'RETURN'].includes(req2.command)) {
           req2.readyTimeout = now + 120 * 1000;
+          //debugDisplay(req2.prefix, req2.mg);
         }
         client.write(req2.msg + terminator);
         debugc(`processRequestQueue ${openRequestCount} ${req2.msg}`);
@@ -418,7 +419,7 @@ if (isClient) {
     debugDisplay(prefix, `Wait ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
     setTimeout(() => { // determine next command: RETURN 1, RETURN 2 or CALL 1 or CALL 2
       debugvm(`Timeout ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
-      debugDisplay(prefix, `Timeout ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
+      //debugDisplay(prefix, `Timeout ${waitIdleTimeout} 1:${curBay.posPick[0]}:E${curBay.posExe[0]}/2:${curBay.posPick[1]}:E${curBay.posExe[1]}`);
       if ((curBay.posPick[0] > 0) && (curBay.posExe[1] !== 0)) {
         debugvm(`return 1 ${prefix} cur ${curBay.posPick[0]} ${curBay.posExe[1]}`);
         returnPosition(prefix, 1);
@@ -449,9 +450,7 @@ if (isClient) {
         debugvm(`call 2 ${prefix} ${tray} cur ${curBay.posExe[0]} ${curVlm.trayOffset}`);
         callTray(prefix, tray + curVlm.trayOffset , 2);
       }
-      /*
-      else
-      else if (curBay.posPick[1] > 0) {
+      /* else if (curBay.posPick[1] > 0) {
         debugvm(`return B 2 ${prefix} cur ${curBay.posPick[1]} ${curBay.posExe[1]}`, curBay);
         returnPosition(prefix, 2);
       } else if (curBay.posPick[0] > 0) {
